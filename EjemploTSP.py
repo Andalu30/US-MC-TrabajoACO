@@ -4,60 +4,58 @@ Intento del ejemplo de la pagina 18 de las diapositivas
 
 import math
 import random
+import copy
 
 
-def probabilidad_ij(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
-    def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta,
-                              i, j):
-        vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
-
-        sum = 0
-        for s in vecinosNoVisitados:
-            n_is = 1 / coste[i][s]
-            sum = sum + (feromonas[i][s]**alpha * n_is**beta)
-        return sum
-
-    def conjuntoVecinosAi(i, hormigaK, costes):
-        vecinos = []
-        visitados = hormigaK['nodosVisitados']
-
-        aux = coste[i]
-        cont = 0
-        for a in aux:
-            if a is not None and cont not in visitados:
-                vecinos.append(cont)
-                cont = cont + 1
-            else:
-                cont = cont + 1
-        return vecinos
-
-    #--------------------
-    if j in conjuntoVecinosAi(i, hormigaK, coste):
-        n_ij = 1 / coste[i][j]
-        prob = (feromonas[i][j]**alpha * n_ij**beta) / sumvecinosNovisitados(
-            hormigaK, nodos, feromonas, coste, alpha, beta, i, j)
-    else:
-        prob = 0
-
-    return prob
-
-
-
-'''print('Cálculo de probabilidades:\n')
-
-print('Sin ignorar ningun nodo:')
-for i in range(1, 7):
-    print(probabilidad_ij(hormigas[0], nodos, feromonas, coste, 1, 1, 0, i))
-
-print('----------------------')
-print('Con una hormiga que ya ha estado en el nodo 1: (2º ejemplo))')
-for i in range(1, 7):
-    print(probabilidad_ij(hormigas[1], nodos, feromonas, coste, 1, 1, 0, i))
-print("--------------------------------------------\n\n") '''
+def imprimeferomonas(feromonas):
+    print("---------------------")
+    for i in feromonas:
+        print(i)
+    print("---------------------")
+def imprimehormigas(hormigas):
+    print("---------------------")
+    for i in hormigas:
+        print(i)
+    print("---------------------")
 
 
 
 def probabilidadHormiga(hormiga, nodos, feromonas, coste, alpha, beta):
+
+    def probabilidad_ij(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
+        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta,
+                                i, j):
+            vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
+
+            sum = 0
+            for s in vecinosNoVisitados:
+                n_is = 1 / coste[i][s]
+                sum = sum + (feromonas[i][s]**alpha * n_is**beta)
+            return sum
+
+        def conjuntoVecinosAi(i, hormigaK, costes):
+            vecinos = []
+            visitados = hormigaK['nodosVisitados']
+
+            aux = coste[i]
+            cont = 0
+            for a in aux:
+                if a is not None and cont not in visitados:
+                    vecinos.append(cont)
+                    cont = cont + 1
+                else:
+                    cont = cont + 1
+            return vecinos
+
+        #--------------------
+        if j in conjuntoVecinosAi(i, hormigaK, coste):
+            n_ij = 1 / coste[i][j]
+            prob = (feromonas[i][j]**alpha * n_ij**beta) / sumvecinosNovisitados(
+                hormigaK, nodos, feromonas, coste, alpha, beta, i, j)
+        else:
+            prob = 0
+
+        return prob
     i = hormiga['nodoActual']
     
     probabilidades = []
@@ -92,6 +90,7 @@ def actualizaFeromonas(hormigas, costes, feromonas, q=1, rho = 0.1):
 
     costeCircuito = []
 
+    
     for hormigaK in hormigas:
         aux = 0
         for t in hormigaK['circuito']:
@@ -204,12 +203,14 @@ def iteracionACO():
         }
     ]
 
-    feromonas = [[10,10,10,10,10,10],
-                 [10,10,10,10,10,10],
-                 [10,10,10,10,10,10],
-                 [10,10,10,10,10,10],
-                 [10,10,10,10,10,10],
-                 [10,10,10,10,10,10]]
+    hormigas_iniciales = copy.deepcopy(hormigas)
+
+    feromonas = [[0,10,10,10,10,10],
+                 [10,0,10,10,10,10],
+                 [10,10,0,10,10,10],
+                 [10,10,10,0,10,10],
+                 [10,10,10,10,0,10],
+                 [10,10,10,10,10,0]]
 
     costes = [
               [None, 1, math.sqrt(5), math.sqrt(5), 2, math.sqrt(2)],
@@ -223,36 +224,47 @@ def iteracionACO():
     #----------------------------------------------------
 
     
+    for iteracion in range(1000):
+        # Hacerlo n veces, el numero de iteraciones, hasta criterio de parada
+        print(f'Iteración {iteracion}')
 
-    for _ in range(5):
-
-        for hormigaK in hormigas:
-            probabilidades = probabilidadHormiga(hormigaK, nodos, feromonas, costes, alpha, beta)
-            #print(f"Probabilidades hormiga {hormigaK['nodoActual']}:\n{probabilidades}")
-
-            movimiento = politicaDecision(probabilidades, nodos)
-            #print(movimiento)
-
-            actualizaHormiga(hormigaK, movimiento)
-            #print(hormigaK)
-            
-        actualizaFeromonas(hormigas, costes, feromonas, q=1, rho=0.1) 
+        # Soluciones de verdad
+        circuitoMejor = []
+        pesoMejorSolucion = math.inf # Para minimizacion
 
 
+        for _ in range(len(costes)-1): # Bucle para optener un recorrido por todos los nodos
+            for hormigaK in hormigas:
+                probabilidades = probabilidadHormiga(hormigaK, nodos, feromonas, costes, alpha, beta)
+                #print(f"Probabilidades hormiga {hormigaK['nodoActual']}:\n{probabilidades}")
 
-    circuitoMejor, pesoMejorSolucion = MejorSolucionEncontrada(hormigas, costes)
+                movimiento = politicaDecision(probabilidades, nodos)
+                #print(movimiento)
+
+                actualizaHormiga(hormigaK, movimiento)
+                #print(hormigaK)
+                
+            actualizaFeromonas(hormigas, costes, feromonas, q=100, rho=0.5)
+
+        # Soluciones parciales
+        circuitoMejoractual, pesoMejorSolucionactual = MejorSolucionEncontrada(hormigas, costes)
+
+        # Actualizacion de las soluciones finales
+        if pesoMejorSolucionactual < pesoMejorSolucion:
+            pesoMejorSolucion = pesoMejorSolucionactual
+            circuitoMejor = circuitoMejoractual
+
+        # Reinicializacion de las hormigas pero no de las feromonas?
+        hormigas = copy.deepcopy(hormigas_iniciales)
+
+        #imprimeferomonas(feromonas)
+
+        
+    
     print(f"La mejor solución encontrada ha sido: {circuitoMejor}, que tiene un peso de {pesoMejorSolucion}")
 
-    print(f'Feromonas nuevas: {feromonas}')
-    #print(hormigas)
+    #imprimeferomonas(feromonas)
+    # imprimehormigas(hormigas)
 
           
-          
-      
-
-
-
-
-
-
 iteracionACO()

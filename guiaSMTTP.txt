@@ -1,0 +1,48 @@
+SMTTP
+
+n trabajos
+cada uno tiene:
+        pj - processing time
+        dj - due date
+        
+        
+            Distribucion de probabilidades igual
+                    pij igual
+                    
+hecho               con nij = 1 / max(T + pij, dj)
+                            donde T = tiempo de todos los trabajos ya schedulled (circuito)
+                            
+            de entre los que acaban despues de su fecha se prefieren los que tardan menos
+
+
+
+
+------------------------------
+
+Actualizacion de feromonas:
+
+
+    feromona = (1-rho)*feromona + rho * tao0
+        con 0 <= rho < 1
+        y donde 
+            tao0 = 1 / m * TEDD
+
+            con TEDD = Total tardiness cuanddo los trabajos se ordenan de acuerdo EDD
+                EDD -> los que tienen la fecha antes van primero
+                 -> falling values of 1/dij ????
+
+
+tao0 tambien es el estado  incial de la matriz de feromonas
+
+
+----------------------------------
+
+1 solucion -> 2-opt strategy:
+    cambios 2a2 entre todos los trabajos -> Si hay alguno mejor es el mejor
+
+    evaporacion simple +
+        para cada arista de la mejor solucion -> feromona = feromona + rho * 1 / T*
+            donde T* = total tardiness of the best schedule
+
+
+
