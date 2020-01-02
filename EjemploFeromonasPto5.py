@@ -1,8 +1,5 @@
 import ClaseTSP
 
-import numpy as np
-from itertools import permutations
-
 
 """
 Intento del ejemplo de SMTTP
@@ -30,18 +27,18 @@ def func_n_ij(hormiga, pTime, due_dates, i, j):
 
     circuito = hormiga['circuito']
     T = 0
-    for (k,m) in circuito:
-        T  = T + pTime[k][m]
+    for (i,j) in circuito:
+        T  = T + pTime[i][j]
 
-    return (1 / max(T + pTime[i][j], due_dates[i][j]))
+    return 1 / (math.max(T + pTime[i][j], due_dates[i][j]) - T)
 
 
-# (hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta)
+
 def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta):
 
-    def probabilidad_ij(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta, i, j):
-        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
-            
+    def probabilidad_ij(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
+        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta,
+                                i, j):
             vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
 
             sum = 0
@@ -55,7 +52,7 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
             vecinos = []
             visitados = hormigaK['nodosVisitados']
 
-            aux = pTime[i]
+            aux = coste[i]
             cont = 0
             for a in aux:
                 if a is not None and cont not in visitados:
@@ -66,24 +63,21 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
             return vecinos
 
         #--------------------
-        if j in conjuntoVecinosAi(i, hormigaK, pTime):
+        if j in conjuntoVecinosAi(i, hormigaK, coste):
             
             n_ij = func_n_ij(hormiga,pTime,due_dates,i,j) #<--- Cambiado
 
-            prob = (feromonas[i][j]**alpha * n_ij**beta) / sumvecinosNovisitados(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta, i, j)
+            prob = (feromonas[i][j]**alpha * n_ij**beta) / sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta, i, j)
         else:
             prob = 0
 
         return prob
-
-
     i = hormiga['nodoActual']
     
     probabilidades = []
 
     for j in range(0, len(nodos)):
-        probabilidades.append( probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
-                                            #(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
+        probabilidades.append(probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
     return probabilidades
 
 def politicaDecision(probabilidades, nodos, u):
@@ -114,7 +108,8 @@ def actualizaHormiga(hormiga, movimiento):
 
 
 def actualizaFeromonasLocal(hormiga,pTime,feromonas,tao_0, m, q=1, rho = 0.1):
-    (i,j) = hormiga['circuito'][len(hormiga['circuito'])-1]
+  
+    (i,j) = hormiga['circuito'][len(hormiga['circuito'])]
 
     feromonas_ij = feromonas[i][j]
     feromonas[i][j] = (1-rho) * feromonas_ij + rho * tao_0
@@ -181,6 +176,7 @@ def MejorSolucionEncontrada(hormigas, costes):
     
 
 
+from itertools import permutations
 
 def opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime):
 
@@ -221,114 +217,90 @@ def iteracionACO():
     beta = 1
 
     # Grafo TSP = K6
-    nodos = range(40)
+    nodos = [0,1,2,3,4,5]
 
-    hormigas = []
-    for i in range(len(nodos)):
-        hormigas.append({
-            'nodoActual':i,
-            'nodosVisitados': [i],
+    # 6 Hormigas, una en cada nodo.
+    hormigas = [        
+        {
+            'nodoActual':0,
+            'nodosVisitados': [0],
             'circuito': []
-        })
-        
-
+        },
+        {
+            'nodoActual':1,
+            'nodosVisitados': [1],
+            'circuito': []
+        },
+        {
+            'nodoActual':2,
+            'nodosVisitados': [2],
+            'circuito': []
+        },        
+        {
+            'nodoActual':3,
+            'nodosVisitados': [3],
+            'circuito': []
+        },
+        {
+            'nodoActual':4,
+            'nodosVisitados': [4],
+            'circuito': []
+        },        
+        {
+            'nodoActual':5,
+            'nodosVisitados': [5],
+            'circuito': []
+        }
+    ]
 
     hormigas_iniciales = copy.deepcopy(hormigas)
 
-    # pTime = [
-    #           [None, 1, math.sqrt(5), math.sqrt(5), 2, math.sqrt(2)],
-    #           [1, None, math.sqrt(2), 2, math.sqrt(5),math.sqrt(5)],
-    #           [math.sqrt(5), math.sqrt(2), None, math.sqrt(2), math.sqrt(5), 3],
-    #           [math.sqrt(5), 2, math.sqrt(2), None, 1, math.sqrt(5)],
-    #           [2, math.sqrt(5), math.sqrt(5), 1, None, math.sqrt(2)],
-    #           [math.sqrt(2), math.sqrt(5), 3, math.sqrt(5), math.sqrt(2), None]
-    #         ]
 
-    # due_dates = [
-    #             [],
-    #             [],
-    #             [],
-    #             [],
-    #             [],
-    #             []
-    #             ]
+    pTime = [
+              [None, 1, math.sqrt(5), math.sqrt(5), 2, math.sqrt(2)],
+              [1, None, math.sqrt(2), 2, math.sqrt(5),math.sqrt(5)],
+              [math.sqrt(5), math.sqrt(2), None, math.sqrt(2), math.sqrt(5), 3],
+              [math.sqrt(5), 2, math.sqrt(2), None, 1, math.sqrt(5)],
+              [2, math.sqrt(5), math.sqrt(5), 1, None, math.sqrt(2)],
+              [math.sqrt(2), math.sqrt(5), 3, math.sqrt(5), math.sqrt(2), None]
+            ]
 
-    processingTimes = [26, 24, 79, 46, 32, 35, 73, 74, 14, 67, 86, 46, 78, 40, 29, 94, 64, 27, 90, 55, 35, 52, 36, 69, 85, 95, 14, 78, 37, 86, 44, 28, 39, 12, 30 ,68 ,70 , 9, 49, 50]
-
-    Weights = [1, 10, 9, 10, 10, 4, 3, 2, 10, 3, 7, 3, 1, 3, 10, 4, 7, 7, 4, 7, 5, 3, 5, 4, 9, 5, 2, 8, 10, 4, 7, 4, 9, 5, 7, 7, 5, 10, 1, 3]
-
-    due_datesInicial = [1588,1620,1731,1773,1694,1487,1566,1844,1727,1636,1599,1539,1855,1645,1709,1660,1582,1836,1484,1559,1772,1510,1512,1795,1522,1509,1598,1658,1826,1628,1650,1833,1627,1528,1541,1497,1481,1446,1579,1814]
-
-
-    pTime = []
-    for i, e in enumerate(processingTimes):
-        pTime.append(processingTimes)
-
-    
-
-    pTime = np.matrix(pTime)
-    np.fill_diagonal(pTime, 0)
-    pTime = pTime.tolist()
-    
-    
-
-    weights = []
-    for i, e in enumerate(Weights):
-        weights.append(Weights)
-
-    weights = np.matrix(weights)
-    np.fill_diagonal(weights, 0)
-    weights = weights.tolist()
-
-    due_dates = []
-    for i, e in enumerate(due_datesInicial):
-        due_dates.append(due_datesInicial)
-
-    due_dates = np.matrix(due_dates)
-    np.fill_diagonal(due_dates, 0)
-    due_dates = due_dates.tolist()
-
-
-
-
+    due_dates = [
+                [],
+                [],
+                [],
+                [],
+                [],
+                []
+                ]
     
 
     def Tedd():
         Tedd = 0
-        for d in due_datesInicial:
-            Tedd = Tedd + 1/d
+        for i in due_dates:
+            for j in due_dates[i]:
+                Tedd = Tedd + 1/due_dates[i][j]
         return Tedd
-
-
-    print(f'Tedd= {Tedd()}')
 
     # TODO
     tao_0 = 1 / len(hormigas) * Tedd()
 
-    feromonas = []
-    for i in range(len(nodos)):
-        aux = []
-        for j in range(len(nodos)):
-            if i == j:
-                aux.append(0)
-            else:
-                aux.append(Tedd())
-        feromonas.append(aux)
-    
+    feromonasAux = [[Tedd()]*len(due_dates)]*len(due_dates)
+    feromonas = copy.deepcopy(feromonasAux)
 
-    # feromonas = [[0,Tedd(),Tedd(),Tedd(),Tedd(),Tedd()],
-    #              [Tedd(),0,Tedd(),Tedd(),Tedd(),Tedd()],
-    #              [Tedd(),Tedd(),0,Tedd(),Tedd(),Tedd()],
-    #              [Tedd(),Tedd(),Tedd(),0,Tedd(),Tedd()],
-    #              [Tedd(),Tedd(),Tedd(),Tedd(),0,Tedd()],
-    #              [Tedd(),Tedd(),Tedd(),Tedd(),Tedd(),0]]
+    feromonas = [[0,Tedd(),Tedd(),Tedd(),Tedd(),Tedd()],
+                 [Tedd(),0,Tedd(),Tedd(),Tedd(),Tedd()],
+                 [Tedd(),Tedd(),0,Tedd(),Tedd(),Tedd()],
+                 [Tedd(),Tedd(),Tedd(),0,Tedd(),Tedd()],
+                 [Tedd(),Tedd(),Tedd(),Tedd(),0,Tedd()],
+                 [Tedd(),Tedd(),Tedd(),Tedd(),Tedd(),0]]
     
     u = random.random()
 
     #----------------------------------------------------
 
     
-    for iteracion in range(20):
+    for iteracion in range(1000):
         # Hacerlo n veces, el numero de iteraciones, hasta criterio de parada
         print(f'Iteración {iteracion}')
 
@@ -350,25 +322,16 @@ def iteracionACO():
                 
 
                 #local
-                actualizaFeromonasLocal(hormigaK,pTime,feromonas,tao_0,len(hormigas),q=100, rho=0.5)
+                actualizaFeromonasLocal(hormigaK, pTime, feromonas, tao_0, q=100, rho=0.5)
 
 
         # Soluciones parciales
         circuitoMejoractual, pesoMejorSolucionactual = MejorSolucionEncontrada(hormigas, pTime)
 
-        print(circuitoMejoractual, pesoMejorSolucionactual)
-
-
-
-        #aunMejorCircuito, aunMejorPeso = opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime)
-
-        aunMejorCircuito, aunMejorPeso = circuitoMejoractual, pesoMejorSolucionactual
+        aunMejorCircuito, aunMejorPeso = opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime)
 
         actualizaFeromonasGlobal(hormigas, pTime, feromonas,aunMejorCircuito, q=1, rho = 0.1)
 
-        print(np.matrix(feromonas))
-
-        print(aunMejorPeso, pesoMejorSolucionactual)
 
         # Actualizacion de las soluciones finales
         if aunMejorPeso < pesoMejorSolucion:
