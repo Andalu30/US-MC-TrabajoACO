@@ -1,7 +1,6 @@
 import ClaseTSP
 
 import numpy as np
-from itertools import permutations
 
 
 """
@@ -12,17 +11,6 @@ import math
 import random
 import copy
 
-
-def imprimeferomonas(feromonas):
-    print("---------------------")
-    for i in feromonas:
-        print(i)
-    print("---------------------")
-def imprimehormigas(hormigas):
-    print("---------------------")
-    for i in hormigas:
-        print(i)
-    print("---------------------")
 
 
 
@@ -108,11 +96,6 @@ def actualizaHormiga(hormiga, movimiento):
     hormiga['circuito'].append(nueva_arista)
 
 
-
-
-
-
-
 def actualizaFeromonasLocal(hormiga,pTime,feromonas,tao_0, m, q=1, rho = 0.1):
     (i,j) = hormiga['circuito'][len(hormiga['circuito'])-1]
 
@@ -184,24 +167,44 @@ def MejorSolucionEncontrada(hormigas, costes):
 
 def opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime):
 
+
+    print("2 opt strategy")
+
+
     aunMejorCircuito = circuitoMejoractual
     aunMejorPeso = pesoMejorSolucionactual
     
-    perms = permutations(circuitoMejoractual)
 
-    for p in perms:
-        peso = 0
-        for (i,j) in p:
-            peso = peso + pTime[i][j]
-        
-        if peso < aunMejorPeso:
-            aunMejorCircuito = p
-            aunMejorPeso = peso
+    
+
+    for (i,j), index in enumerate(circuitoMejoractual):
+        for (x,y), index2 in enumerate(circuitoMejoractual):
+            if index == index2:
+                break
+
+
+
+
+
+    # [1,2,3,4,5]
+    # [2,1,3,4,5]
+
+    # (12, 23, 34, 45)
+    # (21, 13, 34, 45)
+
+
+
+
+        for p in circuitoMejoractual:
+            peso = 0
+            for (i,j) in p:
+                peso = peso + pTime[i][j]
+            
+            if peso < aunMejorPeso:
+                aunMejorCircuito = p
+                aunMejorPeso = peso
 
     return aunMejorCircuito, aunMejorPeso
-
-
-
 
 
 

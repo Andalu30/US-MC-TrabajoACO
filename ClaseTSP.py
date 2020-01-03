@@ -277,9 +277,6 @@ class AlgoritmoACOparaTSP():
 #             [10,10,10,0,10,10],
 #             [10,10,10,10,0,10],
 #             [10,10,10,10,10,0]]
-
-# costes = [
-#             [None, 1, math.sqrt(5), math.sqrt(5), 2, math.sqrt(2)],
 #             [1, None, math.sqrt(2), 2, math.sqrt(5),math.sqrt(5)],
 #             [math.sqrt(5), math.sqrt(2), None, math.sqrt(2), math.sqrt(5), 3],
 #             [math.sqrt(5), 2, math.sqrt(2), None, 1, math.sqrt(5)],
