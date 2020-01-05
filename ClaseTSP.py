@@ -229,7 +229,7 @@ class AlgoritmoACOparaTSP():
 
 
 
-# #------------------------------------------
+# #------------------Ejemplo de utilización-----------------------
 
 # alpha = 1
 # beta = 1
@@ -277,12 +277,17 @@ class AlgoritmoACOparaTSP():
 #             [10,10,10,0,10,10],
 #             [10,10,10,10,0,10],
 #             [10,10,10,10,10,0]]
-#             [1, None, math.sqrt(2), 2, math.sqrt(5),math.sqrt(5)],
-#             [math.sqrt(5), math.sqrt(2), None, math.sqrt(2), math.sqrt(5), 3],
-#             [math.sqrt(5), 2, math.sqrt(2), None, 1, math.sqrt(5)],
-#             [2, math.sqrt(5), math.sqrt(5), 1, None, math.sqrt(2)],
-#             [math.sqrt(2), math.sqrt(5), 3, math.sqrt(5), math.sqrt(2), None]
-#         ]
+
+
+# costes = [
+#          [None, 1, math.sqrt(5), math.sqrt(5), 2, math.sqrt(2)],
+#          [1, None, math.sqrt(2), 2, math.sqrt(5),math.sqrt(5)],
+#          [math.sqrt(5), math.sqrt(2), None, math.sqrt(2), math.sqrt(5), 3],
+#          [math.sqrt(5), 2, math.sqrt(2), None, 1, math.sqrt(5)],
+#          [2, math.sqrt(5), math.sqrt(5), 1, None, math.sqrt(2)],
+#          [math.sqrt(2), math.sqrt(5), 3, math.sqrt(5), math.sqrt(2), None]
+#      ]
+            
 
 
 

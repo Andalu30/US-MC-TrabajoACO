@@ -4,6 +4,37 @@ import copy
 import numpy as np
 
 #------------------------------------------------------------------------
+
+
+
+def actualizaHormiga(hormiga, movimiento):
+    nodoactu = hormiga['nodoActual']
+    nueva_arista = (nodoactu, movimiento)
+
+    hormiga['nodoActual'] = movimiento
+    hormiga['nodosVisitados'].append(movimiento)
+    hormiga['circuito'].append(nueva_arista)
+
+
+
+
+
+
+
+
+def actualizaFeromonasLocal(hormiga,pTime,feromonas,tao_0, m, q=1, rho = 0.1):
+    (i,j) = hormiga['circuito'][len(hormiga['circuito'])-1]
+
+    feromonas_ij = feromonas[i][j]
+    feromonas[i][j] = (1-rho) * feromonas_ij + rho * tao_0
+    feromonas[j][i] = (1-rho) * feromonas_ij + rho * tao_0
+
+
+
+
+
+
+  
 def actualizaFeromonasGlobal(hormigas, pTime, feromonas, solucionMejor, q=1, rho = 0.1):
     
     T_star = 0
@@ -38,23 +69,9 @@ def actualizaFeromonasGlobal(hormigas, pTime, feromonas, solucionMejor, q=1, rho
             #print("-----------------------------------")
 
 
-def actualizaFeromonasLocal(hormiga,pTime,feromonas,tao_0, m, q=1, rho = 0.1):
-    print(hormiga['circuito'])
-    (i,j) = hormiga['circuito'][len(hormiga['circuito'])-1]
-
-    feromonas_ij = feromonas[i][j]
-    feromonas[i][j] = (1-rho) * feromonas_ij + rho * tao_0
-    feromonas[j][i] = (1-rho) * feromonas_ij + rho * tao_0
 
 
 
-def actualizaHormiga(hormiga, movimiento):
-    nodoactu = hormiga['nodoActual']
-    nueva_arista = (nodoactu, movimiento)
-
-    hormiga['nodoActual'] = movimiento
-    hormiga['nodosVisitados'].append(movimiento)
-    hormiga['circuito'].append(nueva_arista)
 
 
 
@@ -76,47 +93,49 @@ def MejorSolucionEncontrada(hormigas, costes):
     
     return mejorSolucion, pesoMejorSolucion
 
+    
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#-----------------------------------------------------------------------------
 # Redefinicion de las funciones para que se aplique la Pheromone SummationRule
+
+
+# def politicaDecision(probabilidades, nodos, u):
+    
+
+#     sum = 0
+#     index = 0
+#     for probciudad in probabilidades: # No compruebo cuales son las vecinas porque las que no lo son tienen probabilidad 0 y por lo tanto no suman nada.
+#         sum = sum + probciudad
+#         if sum > u:
+#             break
+#         else:
+#             index = index + 1
+#     print(index)
+#     return index
+
+
 def politicaDecision(probabilidades, nodos, u, feromonas, i, j, alpha, beta, hormiga, pTime, due_dates):
     decision = None
 
     aux = random.random()
+
     if aux <= u:
         #primera formula
-
         selecciones = []
         
         sum = 0
         for k in range(0,i):
+
             sum = sum + feromonas[k][j]
-            valorNij = func_n_ij(hormiga,pTime,due_dates,k,j)
+            valorNkj = func_n_ij(hormiga,pTime,due_dates,k,j)
+        
+            if probabilidades[k] == 0:
+                selecciones.append(-math.inf)
+            else:
+                selecciones.append(sum**alpha * valorNkj**beta)
 
-            selecciones.append(sum**alpha * valorNij**beta)
-
+        #print(f'selecciones {selecciones} ')
         decision = selecciones.index(max(selecciones))
 
     else:
@@ -127,13 +146,30 @@ def politicaDecision(probabilidades, nodos, u, feromonas, i, j, alpha, beta, hor
         for probciudad in probabilidades:
             sum = sum + probciudad
             if sum > aux2:
-                decision = index
+                if probciudad != 0:
+                    decision = index
                 break
             else:
                 index = index + 1
-        decision = index-1
+        decision = index
     
     return decision
+
+'''    u = random.random()
+
+    sum = 0
+    index = 0
+    for probciudad in probabilidades: 
+        sum = sum + probciudad
+        if sum > u:
+            break
+        else:
+            index = index + 1
+    return index'''
+
+
+
+
 
 
 
@@ -148,39 +184,101 @@ def func_n_ij(hormiga, pTime, due_dates, i, j):
 
 
 
+# # #(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta)
+# def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta):
 
-#(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta)
+#     #probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
+#     def probabilidad_ij(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
+       
+       
+#         def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta,i, j):
+#             vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
+
+#             sumator = 1
+#             for s in vecinosNoVisitados:
+
+#                 suminterno = 0
+#                 for k in range(0,i):
+#                     suminterno = suminterno + feromonas[s][k]
+
+#                 #print(suminterno)
+
+#                 n_is = func_n_ij(hormiga,pTime,due_dates,i,s) #<---- Cambiado
+
+#                 sumator = sumator + (suminterno**alpha * n_is**beta)
+#             return sumator
+
+
+
+
+#         def conjuntoVecinosAi(i, hormigaK, costes):
+#             vecinos = []
+#             visitados = hormigaK['nodosVisitados']
+
+#             aux = coste[i]
+#             cont = 0
+#             for a in aux:
+#                 if a is not None and cont not in visitados:
+#                     vecinos.append(cont)
+#                     cont = cont + 1
+#                 else:
+#                     cont = cont + 1
+#             return vecinos
+
+
+
+#         #--------------------
+#         if j in conjuntoVecinosAi(i, hormigaK, coste):
+            
+#             n_ij = func_n_ij(hormiga,pTime,due_dates,i,j) #<--- Cambiado
+
+#             sum = 0
+#             for k in range(0,i):
+#                 sum = sum + feromonas[k][j]
+
+
+#             prob = (sum**alpha * n_ij**beta) / sumvecinosNovisitados(hormiga, nodos, feromonas, coste, alpha, beta, i, j)
+
+#         else:
+#             prob = 0
+
+#         return prob
+
+
+
+#     i = hormiga['nodoActual']
+    
+#     probabilidades = []
+
+#     for j in range(0, len(nodos)):
+#         if j == i:
+#             probabilidades.append(0)
+#         else:
+#             probabilidades.append(probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
+    
+#     return probabilidades
+
+
+
 def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta):
 
-    #probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
-    def probabilidad_ij(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
-       
-       
-        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta,i, j):
+    def probabilidad_ij(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta, i, j):
+        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
+            
             vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
 
-            sum = 1
+            sum = 0
             for s in vecinosNoVisitados:
-
-                suminterno = 0
-                for k in range(0,i):
-                    suminterno = suminterno + feromonas[k][s]
-
-                print(suminterno)
-
                 n_is = func_n_ij(hormiga,pTime,due_dates,i,s) #<---- Cambiado
 
-                sum = sum + (suminterno**alpha * n_is**beta)
+                sum = sum + (feromonas[i][s]**alpha * n_is**beta)
             return sum
-
-
-
 
         def conjuntoVecinosAi(i, hormigaK, costes):
             vecinos = []
             visitados = hormigaK['nodosVisitados']
 
-            aux = coste[i]
+            aux = pTime[i]
             cont = 0
             for a in aux:
                 if a is not None and cont not in visitados:
@@ -194,36 +292,37 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
 
 
 
+
+
+
+
+
+
+
+
+
+
+
         #--------------------
-        if j in conjuntoVecinosAi(i, hormigaK, coste):
+        if j in conjuntoVecinosAi(i, hormigaK, pTime):
             
             n_ij = func_n_ij(hormiga,pTime,due_dates,i,j) #<--- Cambiado
 
-            sum = 0
-            for k in range(0,i):
-                sum = sum + feromonas[k][j]
-
-
-            prob = (sum**alpha * n_ij**beta) / sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta, i, j)
-
-
-
+            prob = (feromonas[i][j]**alpha * n_ij**beta) / sumvecinosNovisitados(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta, i, j)
         else:
             prob = 0
 
         return prob
+
+
     i = hormiga['nodoActual']
     
     probabilidades = []
 
     for j in range(0, len(nodos)):
-        probabilidades.append(probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
+        probabilidades.append( probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
+                                            #(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
     return probabilidades
-
-
-
-
-
 
 
 
@@ -253,24 +352,6 @@ def iteracionACO():
 
 
     hormigas_iniciales = copy.deepcopy(hormigas)
-
-    # pTime = [
-    #           [None, 1, math.sqrt(5), math.sqrt(5), 2, math.sqrt(2)],
-    #           [1, None, math.sqrt(2), 2, math.sqrt(5),math.sqrt(5)],
-    #           [math.sqrt(5), math.sqrt(2), None, math.sqrt(2), math.sqrt(5), 3],
-    #           [math.sqrt(5), 2, math.sqrt(2), None, 1, math.sqrt(5)],
-    #           [2, math.sqrt(5), math.sqrt(5), 1, None, math.sqrt(2)],
-    #           [math.sqrt(2), math.sqrt(5), 3, math.sqrt(5), math.sqrt(2), None]
-    #         ]
-
-    # due_dates = [
-    #             [],
-    #             [],
-    #             [],
-    #             [],
-    #             [],
-    #             []
-    #             ]
 
     processingTimes = [26, 24, 79, 46, 32, 35, 73, 74, 14, 67, 86, 46, 78, 40, 29, 94, 64, 27, 90, 55, 35, 52, 36, 69, 85, 95, 14, 78, 37, 86, 44, 28, 39, 12, 30 ,68 ,70 , 9, 49, 50]
 
@@ -321,7 +402,6 @@ def iteracionACO():
 
     print(f'Tedd= {Tedd()}')
 
-    # TODO
     tao_0 = 1 / len(hormigas) * Tedd()
 
     feromonas = []
@@ -347,7 +427,7 @@ def iteracionACO():
     #----------------------------------------------------
 
     
-    for iteracion in range(20):
+    for iteracion in range(4):
         # Hacerlo n veces, el numero de iteraciones, hasta criterio de parada
         print(f'Iteración {iteracion}')
 
@@ -361,8 +441,10 @@ def iteracionACO():
                 probabilidades = probabilidadHormiga(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta)
                 #print(f"Probabilidades hormiga {hormigaK['nodoActual']}:\n{probabilidades}")
 
-
+                
+                #movimiento = politicaDecision(probabilidades, nodos, u)
                 movimiento = politicaDecision(probabilidades, nodos, u, feromonas, i,j,alpha,beta, hormigaK,pTime,due_dates)
+                
                 #print(movimiento)
 
                 actualizaHormiga(hormigaK, movimiento)
@@ -386,14 +468,16 @@ def iteracionACO():
 
         actualizaFeromonasGlobal(hormigas, pTime, feromonas,aunMejorCircuito, q=1, rho = 0.1)
 
-        print(np.matrix(feromonas))
+        #print(np.matrix(feromonas))
 
-        print(aunMejorPeso, pesoMejorSolucionactual)
 
         # Actualizacion de las soluciones finales
         if aunMejorPeso < pesoMejorSolucion:
             pesoMejorSolucion = aunMejorPeso
             circuitoMejor = aunMejorCircuito
+
+        print(f'Parcial: {aunMejorPeso}, final: {pesoMejorSolucion}')
+
 
         # Reinicializacion de las hormigas pero no de las feromonas?
         hormigas = copy.deepcopy(hormigas_iniciales)

@@ -1,5 +1,3 @@
-import ClaseTSP
-
 import numpy as np
 
 
@@ -52,6 +50,21 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
                 else:
                     cont = cont + 1
             return vecinos
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #--------------------
         if j in conjuntoVecinosAi(i, hormigaK, pTime):
@@ -166,46 +179,10 @@ def MejorSolucionEncontrada(hormigas, costes):
 
 
 def opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime):
-
-
     print("2 opt strategy")
+    pass
 
-
-    aunMejorCircuito = circuitoMejoractual
-    aunMejorPeso = pesoMejorSolucionactual
-    
-
-    
-
-    for (i,j), index in enumerate(circuitoMejoractual):
-        for (x,y), index2 in enumerate(circuitoMejoractual):
-            if index == index2:
-                break
-
-
-
-
-
-    # [1,2,3,4,5]
-    # [2,1,3,4,5]
-
-    # (12, 23, 34, 45)
-    # (21, 13, 34, 45)
-
-
-
-
-        for p in circuitoMejoractual:
-            peso = 0
-            for (i,j) in p:
-                peso = peso + pTime[i][j]
-            
-            if peso < aunMejorPeso:
-                aunMejorCircuito = p
-                aunMejorPeso = peso
-
-    return aunMejorCircuito, aunMejorPeso
-
+   
 
 
 
@@ -331,7 +308,7 @@ def iteracionACO():
     #----------------------------------------------------
 
     
-    for iteracion in range(20):
+    for iteracion in range(4):
         # Hacerlo n veces, el numero de iteraciones, hasta criterio de parada
         print(f'Iteración {iteracion}')
 
@@ -359,7 +336,7 @@ def iteracionACO():
         # Soluciones parciales
         circuitoMejoractual, pesoMejorSolucionactual = MejorSolucionEncontrada(hormigas, pTime)
 
-        print(circuitoMejoractual, pesoMejorSolucionactual)
+        #print(circuitoMejoractual, pesoMejorSolucionactual)
 
 
 
@@ -369,9 +346,8 @@ def iteracionACO():
 
         actualizaFeromonasGlobal(hormigas, pTime, feromonas,aunMejorCircuito, q=1, rho = 0.1)
 
-        print(np.matrix(feromonas))
-
-        print(aunMejorPeso, pesoMejorSolucionactual)
+        #print(np.matrix(feromonas))
+        #print(aunMejorPeso, pesoMejorSolucionactual)
 
         # Actualizacion de las soluciones finales
         if aunMejorPeso < pesoMejorSolucion:
