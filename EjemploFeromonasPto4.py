@@ -155,19 +155,6 @@ def politicaDecision(probabilidades, nodos, u, feromonas, i, j, alpha, beta, hor
     
     return decision
 
-'''    u = random.random()
-
-    sum = 0
-    index = 0
-    for probciudad in probabilidades: 
-        sum = sum + probciudad
-        if sum > u:
-            break
-        else:
-            index = index + 1
-    return index'''
-
-
 
 
 
@@ -184,17 +171,25 @@ def func_n_ij(hormiga, pTime, due_dates, i, j):
 
 
 
+
+
+
+
+
+
+
 # # #(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta)
 # def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta):
 
 #     #probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
 #     def probabilidad_ij(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
        
+
        
 #         def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, alpha, beta,i, j):
 #             vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
 
-#             sumator = 1
+#             sumator = 0
 #             for s in vecinosNoVisitados:
 
 #                 suminterno = 0
@@ -263,16 +258,47 @@ def func_n_ij(hormiga, pTime, due_dates, i, j):
 def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta):
 
     def probabilidad_ij(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta, i, j):
-        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
+
+        
+        # def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta, i, j):
             
+        #     vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
+
+        #     sum = 0
+        #     for s in vecinosNoVisitados:
+        #         n_is = func_n_ij(hormiga,pTime,due_dates,i,s)
+
+        #         sum = sum + (feromonas[i][s]**alpha * n_is**beta)
+        #     return sum
+
+
+
+
+        def sumvecinosNovisitados(hormigaK, nodos, feromonas, coste, due_dates, alpha, beta,i, j):
             vecinosNoVisitados = conjuntoVecinosAi(i, hormigaK, coste)
 
-            sum = 0
+            sumator = 0
             for s in vecinosNoVisitados:
-                n_is = func_n_ij(hormiga,pTime,due_dates,i,s) #<---- Cambiado
 
-                sum = sum + (feromonas[i][s]**alpha * n_is**beta)
-            return sum
+                suminterno = 0
+                if i !=0:
+                    for k in range(0,i):
+                        suminterno = suminterno + feromonas[s][k]
+                else:
+                    suminterno = suminterno + feromonas[s][0]
+
+                #print(suminterno)
+
+                n_is = func_n_ij(hormiga,pTime,due_dates,i,s)
+
+                sumator = sumator + (suminterno**alpha * n_is**beta)
+
+            return sumator
+
+
+
+
+            
 
         def conjuntoVecinosAi(i, hormigaK, costes):
             vecinos = []
@@ -287,20 +313,6 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
                 else:
                     cont = cont + 1
             return vecinos
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         #--------------------
@@ -321,7 +333,7 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
 
     for j in range(0, len(nodos)):
         probabilidades.append( probabilidad_ij(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta, i, j))
-                                            #(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
+
     return probabilidades
 
 
@@ -422,18 +434,20 @@ def iteracionACO():
     #              [Tedd(),Tedd(),Tedd(),Tedd(),0,Tedd()],
     #              [Tedd(),Tedd(),Tedd(),Tedd(),Tedd(),0]]
     
-    u = random.random()
+    #u = random.random()
+    u = 0.5
 
     #----------------------------------------------------
 
+    circuitoMejor = []
+    pesoMejorSolucion = math.inf # Para minimizacion
     
-    for iteracion in range(4):
+    for iteracion in range(9):
         # Hacerlo n veces, el numero de iteraciones, hasta criterio de parada
         print(f'Iteración {iteracion}')
 
         # Soluciones de verdad
-        circuitoMejor = []
-        pesoMejorSolucion = math.inf # Para minimizacion
+
 
 
         for _ in range(len(pTime)-1): # Bucle para optener un recorrido por todos los nodos
@@ -445,17 +459,19 @@ def iteracionACO():
                 #movimiento = politicaDecision(probabilidades, nodos, u)
                 movimiento = politicaDecision(probabilidades, nodos, u, feromonas, i,j,alpha,beta, hormigaK,pTime,due_dates)
                 
-                #print(movimiento)
+                print(movimiento)
 
                 actualizaHormiga(hormigaK, movimiento)
                 #print(hormigaK)
                 
 
                 #local
-                actualizaFeromonasLocal(hormigaK,pTime,feromonas,tao_0,len(hormigas),q=100, rho=0.5)
+                actualizaFeromonasLocal(hormigaK,pTime,feromonas,tao_0,len(hormigas) ,q=100, rho=0.5)
 
 
         # Soluciones parciales
+
+
         circuitoMejoractual, pesoMejorSolucionactual = MejorSolucionEncontrada(hormigas, pTime)
 
         print(circuitoMejoractual, pesoMejorSolucionactual)
@@ -464,19 +480,23 @@ def iteracionACO():
 
         #aunMejorCircuito, aunMejorPeso = opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime)
 
-        aunMejorCircuito, aunMejorPeso = circuitoMejoractual, pesoMejorSolucionactual
+        #aunMejorCircuito, aunMejorPeso = circuitoMejoractual, pesoMejorSolucionactual
 
-        actualizaFeromonasGlobal(hormigas, pTime, feromonas,aunMejorCircuito, q=1, rho = 0.1)
-
-        #print(np.matrix(feromonas))
 
 
         # Actualizacion de las soluciones finales
-        if aunMejorPeso < pesoMejorSolucion:
-            pesoMejorSolucion = aunMejorPeso
-            circuitoMejor = aunMejorCircuito
+        if pesoMejorSolucionactual < pesoMejorSolucion:
+            pesoMejorSolucion = pesoMejorSolucionactual
+            circuitoMejor = circuitoMejoractual
 
-        print(f'Parcial: {aunMejorPeso}, final: {pesoMejorSolucion}')
+       
+
+
+
+        actualizaFeromonasGlobal(hormigas, pTime, feromonas,circuitoMejor, q=1, rho = 0.1)
+
+        #print(np.matrix(feromonas))
+        
 
 
         # Reinicializacion de las hormigas pero no de las feromonas?
