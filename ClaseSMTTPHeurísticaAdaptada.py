@@ -1,26 +1,156 @@
-"""
-Clase SMTTP
-"""
-
-import numpy as np
-import math
 import random
+import math
 import copy
+import numpy as np
+
+#------------------------------------------------------------------------
 
 
+
+def actualizaHormiga(hormiga, movimiento):
+    nodoactu = hormiga['nodoActual']
+    nueva_arista = (nodoactu, movimiento)
+
+    hormiga['nodoActual'] = movimiento
+    hormiga['nodosVisitados'].append(movimiento)
+    hormiga['circuito'].append(nueva_arista)
+
+
+
+
+
+
+
+
+def actualizaFeromonasLocal(hormiga,pTime,feromonas,tao_0, m, q=1, rho = 0.1):
+    (i,j) = hormiga['circuito'][len(hormiga['circuito'])-1]
+
+    feromonas_ij = feromonas[i][j]
+    feromonas[i][j] = (1-rho) * feromonas_ij + rho * tao_0
+    feromonas[j][i] = (1-rho) * feromonas_ij + rho * tao_0
+
+
+
+
+
+
+  
+def actualizaFeromonasGlobal(hormigas, pTime, feromonas, solucionMejor, q=1, rho = 0.1):
+    
+    T_star = 0
+    for (i,j) in solucionMejor:
+        T_star = T_star + pTime[i][j]
+    
+    
+    for i in range(len(feromonas)):
+        for j in range(len(feromonas[i])):
+            
+            #*************************
+            disipacion = feromonas[i][j] * (1-rho) # Disipacion
+            #******
+
+        
+            if(i<j):
+
+                #*************************
+                feromonas[i][j] = disipacion + rho * (1/T_star)
+                feromonas[j][i] = disipacion + rho * (1/T_star)
+            #*************************
+
+            if i == j:
+
+                #*************************
+              feromonas[i][j] = disipacion
+
+                #*************************
+
+           # print("actualizada: --")
+           # print(feromonas[i][j])
+            #print("-----------------------------------")
+
+
+
+
+
+
+
+
+def MejorSolucionEncontrada(hormigas, costes):
+        
+    def costeLongCircuitoHormiga(circuito, costes):
+        sum = 0
+        for (i,j) in circuito:
+            sum = sum + costes[i][j]
+        return sum
+    
+    pesoMejorSolucion = math.inf
+    for hormiga in hormigas:
+        circuito = hormiga['circuito']
+        coste = costeLongCircuitoHormiga(circuito, costes)
+        if coste < pesoMejorSolucion:
+            pesoMejorSolucion = coste
+            mejorSolucion = circuito
+    
+    return mejorSolucion, pesoMejorSolucion
+
+    
+
+
+#-----------------------------------------------------------------------------
+# Redefinicion de las funciones para que se aplique la Pheromone SummationRule
+
+def politicaDecision(probabilidades, nodos, u, feromonas, i, j, alpha, beta, hormiga, pTime, due_dates):
+    decision = None
+
+    aux = random.random()
+
+    if aux <= u:
+        #primera formula
+        selecciones = []
+        
+        sum = 0
+        for k in range(0,i):
+
+            sum = sum + feromonas[k][j]
+            valorNkj = func_n_ij(hormiga,pTime,due_dates,k,j)
+        
+            if probabilidades[k] == 0:
+                selecciones.append(-math.inf)
+            else:
+                selecciones.append(sum**alpha * valorNkj**beta)
+
+        #print(f'selecciones {selecciones} ')
+        decision = selecciones.index(max(selecciones))
+
+    else:
+        #segunda formula
+        aux2 = random.random()
+        sum = 0
+        index = 0
+        for probciudad in probabilidades:
+            sum = sum + probciudad
+            if sum > aux2:
+                if probciudad != 0:
+                    decision = index
+                break
+            else:
+                index = index + 1
+        decision = index
+    
+    return decision
 
 
 def func_n_ij(hormiga, pTime, due_dates, i, j):
 
     circuito = hormiga['circuito']
     T = 0
-    for (k,m) in circuito:
-        T  = T + pTime[k][m]
+    for (x,y) in circuito:
+        T  = T + pTime[x][y]
 
-    return (1 / max(T + pTime[i][j], due_dates[i][j]))
+    return 1 / (max(T + pTime[i][j], due_dates[i][j]) - T )
 
 
-# (hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta)
+
 def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta):
 
     def probabilidad_ij(hormigaK, nodos, feromonas, pTime, due_dates, alpha, beta, i, j):
@@ -85,103 +215,6 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
                                             #(hormigaK, nodos, feromonas, coste, alpha, beta, i, j):
     return probabilidades
 
-def politicaDecision(probabilidades, nodos, u):
-    
-
-    sum = 0
-    index = 0
-    for probciudad in probabilidades: # No compruebo cuales son las vecinas porque las que no lo son tienen probabilidad 0 y por lo tanto no suman nada.
-        sum = sum + probciudad
-        if sum > u:
-            break
-        else:
-            index = index + 1
-    return index
-    
-def actualizaHormiga(hormiga, movimiento):
-    nodoactu = hormiga['nodoActual']
-    nueva_arista = (nodoactu, movimiento)
-
-    hormiga['nodoActual'] = movimiento
-    hormiga['nodosVisitados'].append(movimiento)
-    hormiga['circuito'].append(nueva_arista)
-
-
-def actualizaFeromonasLocal(hormiga,pTime,feromonas,tao_0, m, q=1, rho = 0.1):
-    (i,j) = hormiga['circuito'][len(hormiga['circuito'])-1]
-
-    feromonas_ij = feromonas[i][j]
-    feromonas[i][j] = (1-rho) * feromonas_ij + rho * tao_0
-    feromonas[j][i] = (1-rho) * feromonas_ij + rho * tao_0
-
-
-  
-def actualizaFeromonasGlobal(hormigas, pTime, feromonas, solucionMejor, q=1, rho = 0.1):
-    
-    T_star = 0
-    for (i,j) in solucionMejor:
-        T_star = T_star + pTime[i][j]
-    
-    
-    for i in range(len(feromonas)):
-        for j in range(len(feromonas[i])):
-            
-            #*************************
-            disipacion = feromonas[i][j] * (1-rho) # Disipacion
-            #******
-
-        
-            if(i<j):
-
-                #*************************
-                feromonas[i][j] = disipacion + rho * (1/T_star)
-                feromonas[j][i] = disipacion + rho * (1/T_star)
-            #*************************
-
-            if i == j:
-
-                #*************************
-              feromonas[i][j] = disipacion
-
-                #*************************
-
-           # print("actualizada: --")
-           # print(feromonas[i][j])
-            #print("-----------------------------------")
-
-
-
-
-
-
-def MejorSolucionEncontrada(hormigas, costes):
-        
-    def costeLongCircuitoHormiga(circuito, costes):
-        sum = 0
-        for (i,j) in circuito:
-            sum = sum + costes[i][j]
-        return sum
-    
-    pesoMejorSolucion = math.inf
-    for hormiga in hormigas:
-        circuito = hormiga['circuito']
-        coste = costeLongCircuitoHormiga(circuito, costes)
-        if coste < pesoMejorSolucion:
-            pesoMejorSolucion = coste
-            mejorSolucion = circuito
-    
-    return mejorSolucion, pesoMejorSolucion
-
-    
-
-
-
-def opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime):
-    print("2 opt strategy")
-    pass
-
-   
-
 
 
 
@@ -190,7 +223,7 @@ def opt2Strategy(circuitoMejoractual, pesoMejorSolucionactual, pTime):
 
 
 #---------------------Clase-----------------
-class AlgoritmoACOparaSMTTP():
+class AlgoritmoACOparaSMTTPHeuristicaAdaptada():
 
     def __init__(self, hormigas, feromonas, pTime, due_dates, nodos, alpha, beta, u,tao_0):
         self.hormigas = hormigas
@@ -225,8 +258,7 @@ class AlgoritmoACOparaSMTTP():
                     probabilidades = probabilidadHormiga(hormigaK, self.nodos, self.feromonas, self.pTime, self.due_dates, self.alpha, self.beta)
                     #print(f"Probabilidades hormiga {hormigaK['nodoActual']}:\n{probabilidades}")
 
-                    movimiento = politicaDecision(probabilidades, self.nodos, self.u)
-                    #print(movimiento)
+                    movimiento = politicaDecision(probabilidades, nodos, u, feromonas, i,j,alpha,beta, hormigaK,pTime,due_dates)                    #print(movimiento)
 
                     actualizaHormiga(hormigaK, movimiento)
                     #print(hormigaK)
@@ -272,6 +304,7 @@ class AlgoritmoACOparaSMTTP():
 
         return circuitoMejor, pesoMejorSolucion
     
+
 
 
 
@@ -353,5 +386,5 @@ class AlgoritmoACOparaSMTTP():
 
 
 # #-----------------------Ejemplo Utilización-----------------------------
-# algoritmo = AlgoritmoACOparaSMTTP(hormigas, feromonas, pTime, due_dates, nodos, alpha, beta,u,tao_0)
+# algoritmo = AlgoritmoACOparaSMTTPHeuristicaAdaptada(hormigas, feromonas, pTime, due_dates, nodos, alpha, beta,u,tao_0)
 # circuito, peso = algoritmo.ejecutaAlgoritmo() # 100 iteraciones,  q = 1, rho = 0.5

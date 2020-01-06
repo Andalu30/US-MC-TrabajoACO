@@ -52,20 +52,6 @@ def probabilidadHormiga(hormiga, nodos, feromonas, pTime, due_dates, alpha, beta
             return vecinos
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         #--------------------
         if j in conjuntoVecinosAi(i, hormigaK, pTime):
             
@@ -280,7 +266,7 @@ def iteracionACO():
         return Tedd
 
 
-    print(f'Tedd= {Tedd()}')
+    #print(f'Tedd= {Tedd()}')
 
     # TODO
     tao_0 = 1 / len(hormigas) * Tedd()
